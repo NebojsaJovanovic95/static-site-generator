@@ -7,7 +7,7 @@ def text_node_to_html_node(text_node: TextNode):
     value = text_node.text
     props = {}
     match text_node.text_type:
-        case TextType.PLAIN:
+        case TextType.PLAIN | TextType.TEXT:
             pass
         case TextType.BOLD:
             tag = "b"
@@ -63,3 +63,59 @@ def extract_markdown_images(text):
 def extract_markdown_links(text):
     regex = r"\[([^\]]+)\]\(([^\)]+)\)"
     return re.findall(regex, text)
+
+def split_markdown_images(text):
+    regex = re.compile(r"\!\[([^\]]+)\]\(([^\)]+)\)")
+    results = []
+    last = 0
+    for m in regex.finditer(text):
+        if m.start() > last:
+            results.append(("text", text[last:m.start()]))
+        results.append( ("image", m.group(1), m.group(2) ) )
+        last = m.end()
+
+    if last < len(text):
+        results.append(("text", text[last:]))
+    return results
+
+def text_to_textnodes(text):
+    TOKEN_REGEX = re.compile(
+        r"""
+        (?P<image>!\[([^\]]+)\]\(([^\)]+)\)) |
+        (?P<link>\[([^\]]+)\]\(([^\)]+)\)) |
+        (?P<bold>\*\*([^*]+)\*\*) |
+        (?P<italic>\*([^*]+)\*)
+        """,
+        re.VERBOSE
+    )
+    tokens = []
+    last = 0
+
+    for m in TOKEN_REGEX.finditer(text):
+        if m.start() > last:
+            tokens.append(
+                TextNode(
+                    text[last:m.start()],
+                    TextType.TEXT,
+                )
+            )
+        kind = m.lastgroup
+        if kind == "image":
+            tokens.append(TextNode(text = m.group(2), text_type=TextType.IMAGE, url=m.group(3)))
+
+        elif kind == "link":
+            tokens.append(TextNode(text=m.group(5), text_type=TextType.LINK, url=m.group(6)))
+
+        elif kind == "bold":
+            tokens.append(TextNode(text=m.group(8), text_type=TextType.BOLD))
+
+        elif kind == "italic":
+            tokens.append(TextNode(text=m.group(9), text_type=TextType.ITALIC))
+
+        last = m.end()
+
+    if last < len(text):
+        tokens.append(TextNode(text=text[last:], text_type=TextType.TEXT))
+
+    return tokens
+

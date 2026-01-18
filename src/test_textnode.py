@@ -1,7 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType
-from util import text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links
+from util import text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_markdown_images
 
 
 class TestTextNode(unittest.TestCase):
@@ -65,6 +65,19 @@ class TestTextNode(unittest.TestCase):
             "This is text with an [link](http://www.boot.dev)"
         )
         self.assertListEqual([("link", "http://www.boot.dev")], matches)
+
+    def test_split_images(self):
+        text = "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)"
+        new_nodes = split_markdown_images(text)
+        self.assertListEqual(
+            [
+                ("text", "This is text with an "),
+                ("image", "image", "https://i.imgur.com/zjjcJKZ.png"),
+                ("text", " and another "),
+                ("image", "second image", "https://i.imgur.com/3elNhQu.png"),
+            ],
+            new_nodes,
+        )
 
 if __name__ == "__main__":
     unittest.main()
