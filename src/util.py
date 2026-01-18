@@ -125,3 +125,17 @@ def text_to_textnodes(text):
 
 def markdown_to_blocks(text):
     return [block.strip() for block in text.split("\n\n")]
+
+def block_to_blocktype(block):
+    if block.startswith("#"):
+        return BlockType.HEADING
+    elif block.startswith("- "):
+        return BlockType.UNORDERED_LIST
+    elif block.split(". ")[0].isdigit():
+        return BlockType.ORDERED_LIST
+    elif block.startswith("> "):
+        return BlockType.QUOTE
+    elif block.startswith("```\n") and block.endswith("```"):
+        return BlockType.CODE
+    else:
+        return BlockType.PARAGRAPH
