@@ -1,9 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType
-from util import text_node_to_html_node
-
-
+from util import text_node_to_html_node, split_nodes_delimiter
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
         node = TextNode("This is a text node", TextType.BOLD)
@@ -41,6 +39,19 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(html_node.value, "")
         self.assertEqual(html_node.props["src"], "./img.png")
         self.assertEqual(html_node.props["alt"], "This is an img node")
+
+    def test_link(self):
+        node = TextNode("This is text with a `code block` word", TextType.PLAIN)
+        new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
+        true_nodes = [
+            TextNode("This is text with a ", TextType.PLAIN),
+            TextNode("code block", TextType.CODE),
+            TextNode(" word", TextType.PLAIN),
+        ]
+        self.assertEqual(new_nodes[0], true_nodes[0])
+        self.assertEqual(new_nodes[1], true_nodes[1])
+        self.assertEqual(new_nodes[2], true_nodes[2])
+
 
 if __name__ == "__main__":
     unittest.main()

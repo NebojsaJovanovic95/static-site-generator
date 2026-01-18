@@ -27,3 +27,30 @@ def text_node_to_html_node(text_node: TextNode):
         case _:
             raise ValueError("text_node type not supported")
     return LeafNode(tag=tag, value=value, props=props)
+
+def split_nodes_delimiter(old_nodes, delimiter, text_type):
+    new_nodes = []
+    for node in old_nodes:
+        if node.text_type != TextType.PLAIN:
+            new_nodes.append(node)
+        __nodes = node.text.split(delimiter)
+        if len(__nodes) % 2 == 0:
+            raise ValueError("Markdown syntax error. Delimeter left unclosed")
+        for i in range(len(__nodes)):
+            if i % 2 == 0:
+                if __nodes[i] == "":
+                    continue
+                new_nodes.append(
+                    TextNode(
+                        __nodes[i],
+                        TextType.PLAIN
+                    )
+                )
+            else:
+                new_nodes.append(
+                    TextNode(
+                        __nodes[i],
+                        text_type,
+                    )
+                )
+    return new_nodes
