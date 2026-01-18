@@ -84,7 +84,8 @@ def text_to_textnodes(text):
         (?P<image>!\[([^\]]+)\]\(([^\)]+)\)) |
         (?P<link>\[([^\]]+)\]\(([^\)]+)\)) |
         (?P<bold>\*\*([^*]+)\*\*) |
-        (?P<italic>\*([^*]+)\*)
+        (?P<italic>_([^_]+)_) |
+        (?P<code>`([^`]+)`)
         """,
         re.VERBOSE
     )
@@ -110,7 +111,10 @@ def text_to_textnodes(text):
             tokens.append(TextNode(text=m.group(8), text_type=TextType.BOLD))
 
         elif kind == "italic":
-            tokens.append(TextNode(text=m.group(9), text_type=TextType.ITALIC))
+            tokens.append(TextNode(text=m.group(10), text_type=TextType.ITALIC))
+
+        elif kind == "code":
+            tokens.append(TextNode(text=m.group(12), text_type=TextType.CODE))
 
         last = m.end()
 
