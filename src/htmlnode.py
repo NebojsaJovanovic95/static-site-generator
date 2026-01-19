@@ -17,7 +17,7 @@ class HtmlNode:
         props = ""
         if self.props:
             for key, value in self.props.items():
-                props += f" {key}={value}"
+                props += f" {key}=\"{value}\""
         return props
 
     def to_html(self) -> str:

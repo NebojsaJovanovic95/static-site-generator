@@ -51,7 +51,7 @@ def generate_page(from_path, template_path, dest_path, basepath):
     page = ""
     with open(template_path, "r", encoding="utf-8") as f:
         template = f.read()
-        page = template.replace("{{ Title }}", title).replace("{{ Content }}", content).replace('href="/', f'href="{basepath}').replace('src="/', f'src="{basepath}')
+        page = template.replace("{{ Title }}", title).replace("{{ Content }}", content).replace('href="/', f'href="{basepath}').replace('src=/', f'src="{basepath}')
         with open(dest_path, "w", encoding="utf-8") as write_file:
             write_file.write(page)
 
