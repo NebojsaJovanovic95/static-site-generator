@@ -1,5 +1,5 @@
 import re
-from textnode import TextNode, TextType
+from textnode import TextNode, TextType, BlockType, BlockNode
 from htmlnode import LeafNode
 
 def text_node_to_html_node(text_node: TextNode):
@@ -124,7 +124,7 @@ def text_to_textnodes(text):
     return tokens
 
 def markdown_to_blocks(text):
-    return [block.strip() for block in text.split("\n\n")]
+    return [block.strip() for block in text.rstrip("\n").split("\n\n")]
 
 def block_to_blocktype(block):
     if block.startswith("#"):
@@ -139,3 +139,10 @@ def block_to_blocktype(block):
         return BlockType.CODE
     else:
         return BlockType.PARAGRAPH
+
+def block_to_blocknode(block):
+    return BlockNode(block_to_blocktype(block), block)
+            
+def markdown_to_html(md):
+    nodes = [block_to_blocknode(block) for block in markdown_to_blocks(md)]
+    return [node.to_html() for node in nodes]
