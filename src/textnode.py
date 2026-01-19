@@ -49,7 +49,7 @@ class TextNode:
                 tag = "code"
             case TextType.LINK:
                 tag = "a"
-                props["href"] = text_node.url
+                props["href"] = self.url
             case TextType.IMAGE:
                 tag = "img"
                 value = ""
@@ -69,6 +69,7 @@ class BlockType(Enum):
     UNORDERED_LIST = "unordered_list"
     ORDERED_LIST = "ordered_list"
     LIST_ITEM = "list_item"
+    DIV = "div"
 
 headings = {
     "#": "h1",
@@ -83,6 +84,7 @@ block_type_to_tag = {
     "code": "code",
     "quote": "quote",
     "list_item": "li",
+    "div": "div",
 }
 
 class BlockNode:
