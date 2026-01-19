@@ -82,7 +82,7 @@ headings = {
 block_type_to_tag = {
     "paragraph": "p",
     "code": "code",
-    "quote": "quote",
+    "quote": "blockquote",
     "list_item": "li",
     "div": "div",
 }
@@ -92,8 +92,14 @@ class BlockNode:
         self.block_type = block_type
         if self.block_type == BlockType.CODE:
             self.content = [TextNode(content[4:-3], TextType.CODE)]
+        elif self.block_type == BlockType.QUOTE:
+            self.content = [TextNode(line_content, TextType.TEXT) for line_content in content.split("> ")]
         elif self.block_type in [BlockType.UNORDERED_LIST, BlockType.ORDERED_LIST]:
-            self.conent = [BlockNode(BlockType.LIST_ITEM, list_item.split(" ", 1)[1]) for list_item in content.split("\n")]
+            self.content = [BlockNode(BlockType.LIST_ITEM, list_item.split(" ", 1)[1]) for list_item in content.split("\n")]
+        elif self.block_type == BlockType.DIV:
+            self.content = [self.block_to_blocknode(block) for block in self.markdown_to_blocks(content)]
+        elif self.block_type == BlockType.HEADING:
+            self.content = content
         else:
             self.content = self.text_to_textnodes(content)
 
@@ -106,11 +112,11 @@ class BlockNode:
     def to_html(self):
         if self.block_type == BlockType.HEADING:
             heading = headings[self.content.split(" ", 1)[0]]
-            return ParentNode(heading, [item.to_html() in self.content])
+            return LeafNode(heading, self.content.split(" ", 1)[1])
         elif self.block_type == BlockType.UNORDERED_LIST:
-            return ParentNode("ul", [item.to_html() in self.content])
+            return ParentNode("ul", [item.to_html() for item in self.content])
         elif self.block_type == BlockType.ORDERED_LIST:
-            return ParentNode("ol", [item.to_html() in self.content])
+            return ParentNode("ol", [item.to_html() for item in self.content])
         elif self.block_type == BlockType.CODE:
             return self.content[0].to_html()
         else:
@@ -161,3 +167,24 @@ class BlockNode:
             tokens.append(TextNode(text=text[last:], text_type=TextType.TEXT))
 
         return tokens
+
+    def markdown_to_blocks(self, text):
+        return [block.strip() for block in text.rstrip("\n").split("\n\n")]
+
+    def block_to_blocktype(self, block):
+        if block.startswith("#"):
+            return BlockType.HEADING
+        elif block.startswith("- "):
+            return BlockType.UNORDERED_LIST
+        elif block.split(". ")[0].isdigit():
+            return BlockType.ORDERED_LIST
+        elif block.startswith("> "):
+            return BlockType.QUOTE
+        elif block.startswith("```\n") and block.endswith("```"):
+            return BlockType.CODE
+        else:
+            return BlockType.PARAGRAPH
+
+    def block_to_blocknode(self, block):
+        return BlockNode(self.block_to_blocktype(block), block)
+ 
